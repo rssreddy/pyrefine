@@ -1,0 +1,92 @@
+# SELF-REFINE with Change-of-Thought Configuration
+
+# LLM Client Configuration
+llm_client:
+  # Selected client: 'openai' or 'gemini'
+  # This will be the ONLY client used (no fallback)
+  selected: 'gemini'
+  
+  # OpenAI Configuration
+  openai:
+    model: 'gpt-4o'
+    api_key_env: 'OPENAI_API_KEY'
+    temperature: 0.7
+    max_tokens: 2048
+    
+  # Gemini Configuration  
+  gemini:
+    model: 'gemini-2.0-flash'
+    api_key_env: 'GEMINI_API_KEY'
+    temperature: 0.7
+    max_tokens: 2048
+
+# Self-Refine Parameters
+self_refine:
+  # Maximum number of refinement iterations
+  max_iterations: 4
+  
+  # Minimum iterations before stopping
+  min_iterations: 1
+  
+  # Enable Change-of-Thought capture
+  enable_cot_capture: true
+  
+  # CoT capture parameters
+  cot_capture:
+    # Track reasoning changes between iterations
+    track_reasoning_changes: true
+    
+    # Confidence threshold for CoT analysis
+    confidence_threshold: 0.8
+    
+    # Maximum CoT tokens to capture
+    max_cot_tokens: 512
+
+# Adaptive Stopping Configuration
+adaptive_stopping:
+  # Enable adaptive stopping
+  enabled: true
+  
+  # Stopping criteria type: 'confidence', 'consistency', 'improvement'
+  criteria_type: 'confidence'
+  
+  # Confidence threshold for stopping
+  confidence_threshold: 0.9
+  
+  # Consistency threshold (for consistency-based stopping)
+  consistency_threshold: 0.85
+  
+  # Improvement threshold (for improvement-based stopping)
+  improvement_threshold: 0.05
+
+# Critic Configuration
+critic:
+  # Enable critic feedback
+  enabled: true
+  
+  # Critic model (can be different from main model)
+  use_primary_model: true
+  
+  # Feedback categories
+  feedback_categories:
+    - "factual_errors"
+    - "logic_gaps" 
+    - "style_issues"
+    - "completeness"
+
+# Logging Configuration
+logging:
+  level: 'INFO'
+  format: 'structured'
+  output_file: 'pyrefine.log'
+  
+# Graph Configuration
+graph:
+  # Enable intermediate state persistence
+  persist_state: true
+  
+  # State storage type: 'memory', 'file', 'database'
+  state_storage: 'memory'
+  
+  # Enable graph visualization
+  enable_visualization: true
