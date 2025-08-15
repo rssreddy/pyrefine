@@ -132,6 +132,16 @@ class ChangeOfThoughtAnalyzer:
             if connector in line.lower():
                 return True
 
+        # If the line contains keywords associated with reasoning types,
+        # it should still be considered a reasoning line even if it lacks
+        # explicit step indicators or connectors. Previously these lines
+        # were ignored which meant valid reasoning such as "I will analyze"
+        # or "a synthesis approach" was not captured, leading to missing
+        # thought change detection between iterations.
+        for pattern in self.reasoning_patterns['reasoning_types'].values():
+            if re.search(pattern, line, re.IGNORECASE):
+                return True
+
         return False
 
     def _extract_confidence(self, text: str) -> float:
