@@ -73,6 +73,8 @@ class SelfRefineGraph:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize the SELF-REFINE graph."""
         self.config = get_config()
+        self.custom_config = config or {}
+        
         if config:
             # Override with provided config
             for key, value in config.items():
@@ -81,9 +83,25 @@ class SelfRefineGraph:
 
         # Initialize components
         self.llm_manager = LLMClientManager()
-        self.cot_analyzer = ChangeOfThoughtAnalyzer()
-        self.critic = Critic(self.llm_manager)
-        self.stopping_manager = AdaptiveStoppingManager()
+        
+        # Pass the cot_capture config to the analyzer if available
+        cot_config = None
+        if config and 'self_refine' in config and 'cot_capture' in config['self_refine']:
+            cot_config = config['self_refine']['cot_capture']
+        
+        # Pass the critic config if available
+        critic_config = None
+        if config and 'critic' in config:
+            critic_config = config['critic']
+        
+        # Pass the adaptive_stopping config if available
+        stopping_config = None
+        if config and 'adaptive_stopping' in config:
+            stopping_config = config['adaptive_stopping']
+        
+        self.cot_analyzer = ChangeOfThoughtAnalyzer(config=cot_config)
+        self.critic = Critic(self.llm_manager, config=critic_config)
+        self.stopping_manager = AdaptiveStoppingManager(config=stopping_config)
 
         # Build the graph
         self.graph = self._build_graph()
@@ -141,10 +159,14 @@ class SelfRefineGraph:
         self.cot_analyzer.reset()
         self.stopping_manager.reset()
 
+        # Get max/min iterations from custom config or use defaults
+        max_iterations = self.custom_config.get('self_refine', {}).get('max_iterations', 4)  # Default: 4
+        min_iterations = self.custom_config.get('self_refine', {}).get('min_iterations', 1)  # Default: 1
+
         return {
             "iteration": 0,
-            "max_iterations": self.config.self_refine.max_iterations,
-            "min_iterations": self.config.self_refine.min_iterations,
+            "max_iterations": max_iterations,
+            "min_iterations": min_iterations,
             "responses": [],
             "cot_captures": [],
             "critic_feedback_history": [],
@@ -305,12 +327,16 @@ Think through your response step-by-step and provide detailed reasoning for your
         # Generate session ID first
         session_id = f"selfrefine_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         
+        # Get max/min iterations from custom config or use defaults
+        max_iterations = self.custom_config.get('self_refine', {}).get('max_iterations', 4)  # Default: 4
+        min_iterations = self.custom_config.get('self_refine', {}).get('min_iterations', 1)  # Default: 1
+        
         # Create initial state
         initial_state = SelfRefineState(
             original_prompt=prompt,
             iteration=0,
-            max_iterations=self.config.self_refine.max_iterations,
-            min_iterations=self.config.self_refine.min_iterations,
+            max_iterations=max_iterations,
+            min_iterations=min_iterations,
             responses=[],
             current_response="",
             cot_captures=[],

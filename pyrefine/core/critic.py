@@ -41,7 +41,10 @@ class Critic:
     def __init__(self, llm_manager: LLMClientManager, config: Optional[Dict[str, Any]] = None):
         """Initialize the critic."""
         self.llm_manager = llm_manager
-        self.config = config or get_config().critic.model_dump()
+        if config is not None:
+            self.config = config
+        else:
+            self.config = get_config().critic.model_dump()
 
         # Critic prompt template as specified in requirements
         self.critic_prompt = self._build_critic_prompt()

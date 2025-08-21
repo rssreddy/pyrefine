@@ -51,7 +51,10 @@ class ChangeOfThoughtAnalyzer:
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Initialize CoT analyzer."""
-        self.config = config or get_config().self_refine.cot_capture.model_dump()
+        if config is not None:
+            self.config = config
+        else:
+            self.config = get_config().self_refine.cot_capture.model_dump()
         self.previous_cot: Optional[CoTCapture] = None
         self.cot_history: List[CoTCapture] = []
 

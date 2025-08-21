@@ -204,15 +204,18 @@ async def test_client_switching():
         # Test client manager
         manager = LLMClientManager()
 
-        print(f"Available clients: {manager.get_available_clients()}")
-        print(f"Primary client: {manager.primary_client_name}")
-        print(f"Fallback client: {manager.fallback_client_name}")
+        print(f"Current client: {manager.get_selected_client_name()}")
+        print(f"Model: {manager.get_model_name()}")
+
+        # Test availability
+        print(f"OpenAI available: {manager.is_client_available('openai')}")
+        print(f"Gemini available: {manager.is_client_available('gemini')}")
 
         # Test switching
-        if "gemini" in manager.get_available_clients():
-            print("\nTesting client switch to Gemini...")
-            manager.switch_primary_client("gemini")
-            print(f"New primary client: {manager.primary_client_name}")
+        if manager.is_client_available("openai"):
+            print("\nTesting client switch to OpenAI...")
+            manager.switch_client("openai")
+            print(f"New client: {manager.get_selected_client_name()}")
 
         print("Client switching test completed!")
 
